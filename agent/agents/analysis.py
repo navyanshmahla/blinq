@@ -53,9 +53,11 @@ class analysisAgent():
             exec(clean_code, env)
 
             if 'result' not in env:
-                return {"error": "Code must assign figure to 'result' variable", "status": "failed"}
+                return {"error": "Code execution completed but 'result' variable was not assigned. Make sure to assign the matplotlib figure to 'result' variable.", "status": "failed"}
 
             fig = env['result']
+            if fig is None:
+                return {"error": "'result' variable is None. Make sure to assign a valid matplotlib figure object to 'result'.", "status": "failed"}
             buf = io.BytesIO()
             fig.savefig(buf, format='png', bbox_inches='tight', dpi=150)
             buf.seek(0)
@@ -72,14 +74,20 @@ class analysisAgent():
                 await self.kafka_producer.send_plot_notification(result)
             else:
                 try:
-                    with open("plot_output.png", "wb") as f:
+                    output_path = os.path.join(os.path.dirname(__file__), "plot_output.png")
+                    with open(output_path, "wb") as f:
                         f.write(base64.b64decode(image_bytes))
+                    result["local_path"] = output_path
+                    print(f"[DEBUG] Plot saved to: {output_path}")
                 except Exception as save_err:
                     result["warning"] = f"Failed to save plot locally: {str(save_err)}"
+                    print(f"[DEBUG] Failed to save plot: {str(save_err)}")
 
             return result
         except Exception as e:
-            return {"error": str(e), "status": "failed", "message": f"Plotting failed: {str(e)}"}
+            error_result = {"error": str(e), "status": "failed", "message": f"Plotting failed: {str(e)}"}
+            print(f"[DEBUG] Plot error: {str(e)}")
+            return error_result
             
 
 
@@ -103,11 +111,11 @@ TOOLS_ANALYSIS = [
         "type": "function",
         "function": {
             "name": "plot",
-            "description": "Create a matplotlib visualization and return image bytes for S3 upload",
+            "description": "Create a matplotlib visualization and return image bytes. The bytes are automatically sent to frontend via WebSocket.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "code": {"type": "string", "description": "Python code that creates a matplotlib figure. Must use Polars DataFrame 'df' and assign final figure to 'result' variable."},
+                    "code": {"type": "string", "description": "Python code that creates a matplotlib figure. Must use Polars DataFrame 'df' and assign final figure to 'result' variable. Returns base64-encoded PNG bytes."},
                 },
                 "required": ["code"]
             }

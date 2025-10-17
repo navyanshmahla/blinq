@@ -45,17 +45,16 @@ class Tools():
             info_lines.append(f"  {name}: {dtype}")
         return "\n".join(info_lines)
 
-    def sql(self, query: str) -> pl.DataFrame:
+    def sql(self, query: str):
         """
         execute a sql query using polars
         """
         try:
             return self.df.sql(query)
         except Exception as e:
-            print(f"SQL query error: {str(e)}")
-            print("Please check your query syntax and try again.")
-            # Return empty DataFrame with same schema as original
-            return pl.DataFrame(schema=self.df.schema)
+            error_msg = f"SQL Error: {str(e)}"
+            print(error_msg)
+            return {"error": error_msg, "status": "failed"}
 
 
 if __name__ == "__main__":

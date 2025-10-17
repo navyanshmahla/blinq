@@ -116,5 +116,5 @@ if __name__ == "__main__":
     import asyncio
     data_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "data.csv")
     df = pl.read_csv(data_path)
-    result = asyncio.run(run_main_agent(df, input="How much have i spent flight bookings?"))
+    result = asyncio.run(run_main_agent(df, input="Plot me a graph of food vs shopping spends (Note: ignore the category column. Its useless. Dont use it)"))
     print(result)
