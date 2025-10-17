@@ -1,4 +1,5 @@
 import litellm
+from litellm import completion_cost
 import yaml
 import polars as pl
 import sys
@@ -21,11 +22,12 @@ if configs['run_state'] == "integrated":
 MODEL_ANALYSIS_AGENT = configs['models']['MODEL_ANALYSIS_AGENT']
 
 class analysisAgent():
-    def __init__(self, df: pl.DataFrame):
+    def __init__(self, df: pl.DataFrame, req_id: str):
         self.df = df
         self.tools = Tools(df)
         if configs['run_state'] == "integrated":
             self.kafka_producer = KafkaProducer()
+        self.request_id = req_id
 
     async def sql(self, query: str):
         """Execute SQL query on dataframe"""
@@ -67,14 +69,15 @@ class analysisAgent():
             result = {
                 "image_bytes": image_bytes,
                 "status": "success",
-                "message": "Plot created successfully"
+                "message": "Plot created successfully",
+                "request_id": self.request_id
             }
 
             if configs['run_state'] == "integrated":
                 await self.kafka_producer.send_plot_notification(result)
             else:
                 try:
-                    output_path = os.path.join(os.path.dirname(__file__), "plot_output.png")
+                    output_path = os.path.join(os.path.dirname(__file__), f"plot_output_{self.request_id}.png")
                     with open(output_path, "wb") as f:
                         f.write(base64.b64decode(image_bytes))
                     result["local_path"] = output_path
@@ -123,16 +126,17 @@ TOOLS_ANALYSIS = [
     }
 ]
 
-async def get_func_mapper_analysis_agent(df: pl.DataFrame):
-    agent = analysisAgent(df)
+async def get_func_mapper_analysis_agent(df: pl.DataFrame, req_id: str):
+    agent = analysisAgent(df, req_id)
     return {
         "sql": agent.sql,
         "plot": agent.plot
     }
 
-async def run_analysis_agent(df: pl.DataFrame, input: str = None, messages: list = None, prompt: str = None):
+async def run_analysis_agent(df: pl.DataFrame, req_id: str, input: str = None, messages: list = None, prompt: str = None, is_plotting: bool = False):
+    total_cost = 0
 
-    func_mapper = await get_func_mapper_analysis_agent(df)
+    func_mapper = await get_func_mapper_analysis_agent(df, req_id)
 
     if input:
         if prompt is None:
@@ -160,11 +164,15 @@ async def run_analysis_agent(df: pl.DataFrame, input: str = None, messages: list
         tool_choice = "auto",
         seed = 42
     )
+
+    cost = completion_cost(completion_response=response)
+    total_cost+=cost
+
     response_message = response.choices[0].message
     tool_calls = response_message.tool_calls
 
     if tool_calls is None or len(tool_calls) == 0:
-        return response_message.content
+        return response_message.content, total_cost, is_plotting
 
     if tool_calls is not None and len(tool_calls) > 0:
         context.append(response_message)
@@ -172,12 +180,12 @@ async def run_analysis_agent(df: pl.DataFrame, input: str = None, messages: list
             import json
             print(f"Calling function: {tool_call.function.name}")
             print(f"Arguments: {tool_call.function.arguments}")
-            func_mapper = await get_func_mapper_analysis_agent(df)
+            func_mapper = await get_func_mapper_analysis_agent(df, req_id)
             function = func_mapper[tool_call.function.name]
             args = json.loads(tool_call.function.arguments) if isinstance(tool_call.function.arguments, str) else tool_call.function.arguments
             result = await function(**args)
             if tool_call.function.name == "plot":
-
+                is_plotting = True
                 context.append(
                     {
                         "tool_call_id": tool_call.id,
@@ -194,10 +202,12 @@ async def run_analysis_agent(df: pl.DataFrame, input: str = None, messages: list
                         "content": str(result)
                     })
 
-        final_result = await run_analysis_agent(df, messages=context)
+        final_result, cost_nested, is_plotting_nested = await run_analysis_agent(df, req_id, messages=context, is_plotting=is_plotting)
+        total_cost += cost_nested
+        is_plotting = is_plotting_nested
         if final_result is None:
             raise ValueError("No result from the analysis agent")
-        return final_result
+        return final_result, total_cost, is_plotting
     
 
 ANALYSIS_AGENT_TOOL = {

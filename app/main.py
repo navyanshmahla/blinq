@@ -14,13 +14,10 @@ app.add_middleware(
 )
 
 from app.routers import plots, data, analysis
-from app.websockets.plots import router as ws_plots_router
-from app.background.kafka_consumers import start_consumers, stop_consumers
 
 app.include_router(plots.router, prefix="/api/plots")
 app.include_router(data.router, prefix="/api/data")
 app.include_router(analysis.router, prefix="/api/analysis")
-app.include_router(ws_plots_router, prefix="/ws")
 
 @app.get("/health")
 async def health_check():

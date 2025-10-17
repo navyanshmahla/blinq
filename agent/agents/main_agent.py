@@ -1,4 +1,6 @@
+from uuid import uuid4
 import litellm
+from litellm import completion_cost
 import yaml
 import polars as pl
 from functools import partial
@@ -16,9 +18,9 @@ with open(config_path, "r") as f:
 MODEL_MAIN = configs['models']['MODEL_MAIN']
 
 class MainAgent():
-    def __init__(self, df: pl.DataFrame):
+    def __init__(self, df: pl.DataFrame, request_id: str):
         self.df = df
-        self.analysis = analysisAgent(df)
+        self.analysis = analysisAgent(df, request_id)
 
     async def accumulate_context(self):
         """Accumulate context from dataframe analysis"""
@@ -53,12 +55,17 @@ class MainAgent():
         return base_prompt + "\n\n Here is some CONTEXT regarding the uploaded CSV file:\n" + context
 
 
-async def run_main_agent(df: pl.DataFrame, input: str = None, messages: list = None):
-    main_agent = MainAgent(df)
+async def run_main_agent(df: pl.DataFrame, input: str = None, messages: list = None, is_plotting: bool = False, request_id: str = None):
+    total_cost = 0
+    if request_id is None:
+        request_id = str(uuid4())
+
+    main_agent = MainAgent(df, request_id)
     enriched_prompt = await main_agent.get_enriched_prompt(PROMPT_ANALYSIS)
     enriched_prompt_main = await main_agent.get_enriched_prompt(PROMPT_MAIN)
+    
     FUNC_MAPPER = {
-        "run_analysis_agent": partial(run_analysis_agent, df=df, prompt=enriched_prompt),
+        "run_analysis_agent": partial(run_analysis_agent, df=df, req_id=request_id, prompt=enriched_prompt),
     }
     if input:
         messages = [
@@ -84,11 +91,15 @@ async def run_main_agent(df: pl.DataFrame, input: str = None, messages: list = N
         tool_choice = "auto",
         seed = 42
     )
+
+    cost = completion_cost(completion_response=response)
+    total_cost+=cost
+
     response_message = response.choices[0].message
     tool_calls = response_message.tool_calls
 
     if tool_calls is None or len(tool_calls) == 0:
-        return response_message.content
+        return response_message.content, total_cost, is_plotting, request_id
 
     if tool_calls is not None and len(tool_calls) > 0:
         context.append(response_message)
@@ -99,7 +110,9 @@ async def run_main_agent(df: pl.DataFrame, input: str = None, messages: list = N
             
             args = json.loads(tool_call.function.arguments) if isinstance(tool_call.function.arguments, str) else tool_call.function.arguments
             function = FUNC_MAPPER[tool_call.function.name]
-            result = await function(**args)
+            result, cost_nested, plot_what = await function(**args)
+            is_plotting = plot_what
+            total_cost += cost_nested
             context.append({
                 "tool_call_id": tool_call.id,
                 "role": "tool",
@@ -107,14 +120,16 @@ async def run_main_agent(df: pl.DataFrame, input: str = None, messages: list = N
                 "content": str(result)
             })
 
-    final_result = await run_main_agent(df, messages=context)
+    final_result, cost_nested, is_plotting_nested, _ = await run_main_agent(df, messages=context, is_plotting=is_plotting, request_id=request_id)
+    is_plotting = is_plotting_nested
+    total_cost+=cost_nested
     if final_result is None:
         raise ValueError("No result from the main agent")
-    return final_result
+    return final_result, total_cost, is_plotting, request_id
 
 if __name__ == "__main__":
     import asyncio
     data_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "data.csv")
     df = pl.read_csv(data_path)
-    result = asyncio.run(run_main_agent(df, input="Plot me a graph of food vs shopping spends (Note: ignore the category column. Its useless. Dont use it)"))
+    result = asyncio.run(run_main_agent(df, input="Plot me my food vs shopping spends on a bar graph"))
     print(result)

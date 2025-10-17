@@ -41,17 +41,28 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 - `POST /api/plots` - Create plot
 - `POST /api/data/upload` - Upload CSV
 - `GET /api/data/query` - Query data
-- `POST /api/analysis` - Run analysis
-
-## WebSocket
-
-- `WS /ws/plots?token=<jwt>` - Real-time plot notifications
+- `POST /api/analysis` - Run analysis (accepts CSV file + query, returns response/cost/is_plotting)
 
 ## Architecture
 
 Single FastAPI service running:
 - REST APIs (all routes on `/api/*`)
-- WebSockets (all on `/ws/*`)
-- Kafka consumers (background tasks)
+- Kafka consumers (background tasks for plot notifications)
+- Backend acts as middleware between frontend and agent API
 
 All on one port for easy deployment.
+
+**Flow:**
+1. Frontend → Backend → Agent API (`/api/analysis`)
+2. Agent API processes data (SQL/plotting)
+3. If plotting: Agent → Kafka → Backend listens → Frontend
+4. If analysis: Agent → Backend → Frontend
+
+## NOTE:
+Any interaction with the frontend happens through the backend ie backend acts as the middleware. All the APIs are through that. For frontend in case of image plots, it gets routed through backend. Websockets are prolly not needed. 
+
+# TODOs:
+1. Backend APIs
+2. DB 
+3. Auth
+4. Frontend of the app
