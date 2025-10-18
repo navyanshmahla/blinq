@@ -11,21 +11,32 @@ Blinq/
 │   ├── routers/             # REST API endpoints
 │   │   ├── plots.py         # Plot management
 │   │   ├── data.py          # Data upload/query
-│   │   └── analysis.py      # Analysis endpoints
-│   ├── websockets/          # WebSocket endpoints
-│   │   └── plots.py         # Plot notifications
+│   │   ├── analysis.py      # Analysis endpoints (calls agent API)
+│   │   ├── auth.py          # Authentication (login/register)
+│   │   ├── billing.py       # Billing and usage tracking
+│   │   └── user.py          # User profile and query history
 │   └── background/          # Background tasks
-│       └── kafka_consumers.py  # Kafka consumers
+│       └── kafka_consumers.py  # Kafka consumers for plot notifications
 ├── agent/                   # AI agents
-│   └── agents/
-│       └── plotter.py       # Plotting agent
+│   ├── agents/
+│   │   ├── main_agent.py    # Main orchestrator agent
+│   │   └── analysis.py      # Analysis and plotting agent (unified)
+│   ├── tools/
+│   │   └── tools.py         # SQL and data exploration tools
+│   └── prompts/
+│       └── prompts.py       # LLM prompts
 ├── message_broker/          # Kafka abstraction
 │   ├── config.py           # Kafka configuration
-│   ├── producer.py         # Message producer
-│   └── consumer.py         # Message consumer
-├── auth/                    # Authentication
-│   └── websocket_auth.py   # WebSocket JWT auth
+│   ├── producer.py         # Message producer (singleton)
+│   └── consumer.py         # Message consumer base class
+├── auth/                    # Authentication (future)
+│   ├── jwt_handler.py      # JWT token creation/verification
+│   ├── dependencies.py     # get_current_user() dependency
+│   └── password.py         # Password hashing
 └── db/                      # Database (future)
+    ├── database.py         # SQLAlchemy connection
+    ├── models.py           # User, QueryHistory, Transaction models
+    └── crud.py             # Database operations
 ```
 
 ## Running the Application
@@ -36,12 +47,29 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 ## API Endpoints
 
+### Core
 - `GET /health` - Health check
-- `GET /api/plots` - List plots
-- `POST /api/plots` - Create plot
+
+### Authentication (Future)
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login (returns JWT)
+
+### Analysis
+- `POST /api/analysis/` - Run analysis (CSV file + query → response/cost/is_plotting/request_id)
+
+### User Management (Future)
+- `GET /api/user/profile` - Get user profile
+- `GET /api/user/queries` - Get query history
+
+### Billing (Future)
+- `GET /api/billing/usage` - Get usage stats
+- `GET /api/billing/history` - Get billing history
+
+### Data & Plots (Future)
 - `POST /api/data/upload` - Upload CSV
 - `GET /api/data/query` - Query data
-- `POST /api/analysis` - Run analysis (accepts CSV file + query, returns response/cost/is_plotting)
+- `GET /api/plots` - List plots
+- `POST /api/plots` - Create plot
 
 ## Architecture
 
@@ -58,11 +86,34 @@ All on one port for easy deployment.
 3. If plotting: Agent → Kafka → Backend listens → Frontend
 4. If analysis: Agent → Backend → Frontend
 
-## NOTE:
-Any interaction with the frontend happens through the backend ie backend acts as the middleware. All the APIs are through that. For frontend in case of image plots, it gets routed through backend. Websockets are prolly not needed. 
+## Design Principles
 
-# TODOs:
-1. Backend APIs
-2. DB 
-3. Auth
-4. Frontend of the app
+1. **Backend as Middleware**: All frontend interactions go through backend
+2. **Modular Architecture**: Separate folders for agents, auth, db, message_broker for easy swapping
+3. **Request ID Correlation**: Match async plot notifications to requests without WebSockets
+4. **Single Service**: Everything runs on one port for easy deployment
+
+## Development Roadmap
+
+### Phase 1: Foundation ✅
+- [x] Agent API implementation (main_agent, analysis_agent)
+- [x] Kafka message broker setup
+- [x] Request ID correlation for plots
+
+### Phase 2: Database & Auth (Next)
+- [ ] Set up SQLAlchemy with PostgreSQL/SQLite
+- [ ] User, QueryHistory, Transaction models
+- [ ] JWT authentication (login/register)
+- [ ] Protected endpoints with `get_current_user` dependency
+
+### Phase 3: Core Features
+- [ ] Query history tracking
+- [ ] Usage and billing tracking
+- [ ] Kafka consumer integration with backend
+- [ ] Plot retrieval by request_id
+
+### Phase 4: Polish
+- [ ] Rate limiting
+- [ ] Error handling and logging
+- [ ] Frontend development
+- [ ] Deployment configuration

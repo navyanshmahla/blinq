@@ -13,8 +13,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from app.routers import plots, data, analysis
+from app.routers import auth, plots, data, analysis, conversations
+from app.background.kafka_consumers import start_consumers, stop_consumers
 
+app.include_router(auth.router, prefix="/api/auth")
+app.include_router(conversations.router, prefix="/api/conversations")
 app.include_router(plots.router, prefix="/api/plots")
 app.include_router(data.router, prefix="/api/data")
 app.include_router(analysis.router, prefix="/api/analysis")

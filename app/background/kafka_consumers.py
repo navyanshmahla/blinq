@@ -1,8 +1,7 @@
 import asyncio
 import sys
 sys.path.append("../../")
-from message_broker import KafkaConsumer
-from app.websockets.plots import manager
+from app.message_broker import KafkaConsumer
 
 consumer_task = None
 consumer_instance = None

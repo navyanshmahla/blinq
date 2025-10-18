@@ -17,7 +17,7 @@ with open(config_path, "r") as f:
     configs = yaml.safe_load(f)
 
 if configs['run_state'] == "integrated":
-    from message_broker import KafkaProducer
+    from app.message_broker import KafkaProducer
 
 MODEL_ANALYSIS_AGENT = configs['models']['MODEL_ANALYSIS_AGENT']
 
