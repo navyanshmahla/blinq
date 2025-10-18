@@ -14,7 +14,6 @@ app.add_middleware(
 )
 
 from app.routers import auth, plots, data, analysis, conversations
-from app.background.kafka_consumers import start_consumers, stop_consumers
 
 app.include_router(auth.router, prefix="/api/auth")
 app.include_router(conversations.router, prefix="/api/conversations")
@@ -26,13 +25,3 @@ app.include_router(analysis.router, prefix="/api/analysis")
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "service": "blinq"}
-
-@app.on_event("startup")
-async def startup():
-    """Start background tasks"""
-    await start_consumers()
-
-@app.on_event("shutdown")
-async def shutdown():
-    """Graceful shutdown"""
-    await stop_consumers()

@@ -88,7 +88,7 @@ class MessageResponse(BaseModel):
         from_attributes = True
 
 class PlotCreate(BaseModel):
-    message_id: UUID
+    message_id: Optional[UUID] = None
     request_id: UUID
     image_data: bytes
 
@@ -104,7 +104,6 @@ class PlotResponse(BaseModel):
 class UsageTrackingCreate(BaseModel):
     user_id: UUID
     message_id: UUID
-    tokens_used: int
     cost: float
     model_used: str
 
@@ -112,7 +111,6 @@ class UsageTrackingResponse(BaseModel):
     id: UUID
     user_id: UUID
     message_id: UUID
-    tokens_used: int
     cost: float
     model_used: str
     created_at: datetime

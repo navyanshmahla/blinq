@@ -75,7 +75,7 @@ class Plot(Base):
     __tablename__ = "plots"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    message_id = Column(UUID(as_uuid=True), ForeignKey("messages.id"), nullable=False, unique=True)
+    message_id = Column(UUID(as_uuid=True), ForeignKey("messages.id"), nullable=True, unique=True)
     request_id = Column(UUID(as_uuid=True), nullable=False, unique=True, index=True)
     image_data = Column(LargeBinary, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -88,7 +88,6 @@ class UsageTracking(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     message_id = Column(UUID(as_uuid=True), ForeignKey("messages.id"), nullable=False, unique=True)
-    tokens_used = Column(Integer, nullable=False)
     cost = Column(Float, nullable=False)
     model_used = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, index=True)

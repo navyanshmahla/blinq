@@ -169,7 +169,6 @@ def create_usage_tracking(db: Session, usage_data: UsageTrackingCreate):
     usage = UsageTracking(
         user_id=usage_data.user_id,
         message_id=usage_data.message_id,
-        tokens_used=usage_data.tokens_used,
         cost=usage_data.cost,
         model_used=usage_data.model_used
     )

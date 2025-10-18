@@ -5,8 +5,10 @@ import polars as pl
 import io
 import sys
 import os
+import asyncio
+import base64
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timedelta
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
 from agent.agents.main_agent import run_main_agent
@@ -14,6 +16,22 @@ from app.db import get_db, crud, schemas
 from app.auth.dependencies import get_current_user
 
 router = APIRouter(tags=["analysis"])
+
+async def wait_for_plot_in_db(db: Session, request_id: str, timeout: int = 60):
+    """Poll database for plot with exponential backoff"""
+    end_time = datetime.utcnow() + timedelta(seconds=timeout)
+    wait_interval = 0.1
+
+    while datetime.utcnow() < end_time:
+        plot = crud.get_plot_by_request_id(db, UUID(request_id))
+        if plot:
+            return plot.image_data
+
+        await asyncio.sleep(wait_interval)
+        wait_interval = min(wait_interval * 1.5, 2)
+        db.expire_all()
+
+    return None
 
 @router.post("/")
 async def call_agent_api(
@@ -67,19 +85,31 @@ async def call_agent_api(
         crud.create_usage_tracking(db, schemas.UsageTrackingCreate(
             user_id=UUID(user_id),
             message_id=assistant_message.id,
-            tokens_used=0,
             cost=total_cost,
-            model_used="grok-4"
+            model_used="grok-4-reasoning-fast"
         ))
 
-        return JSONResponse(content={
+        response_data = {
             "response": result,
             "is_plotting": is_plotting,
             "cost": total_cost,
             "request_id": request_id,
             "message_id": str(assistant_message.id),
             "status": "success"
-        })
+        }
+
+        if is_plotting and request_id:
+            plot_data = await wait_for_plot_in_db(db, request_id, timeout=60)
+            if plot_data:
+                plot = crud.get_plot_by_request_id(db, UUID(request_id))
+                plot.message_id = assistant_message.id
+                db.commit()
+                response_data["plot_image"] = base64.b64encode(plot_data).decode('utf-8')
+                response_data["plot_status"] = "ready"
+            else:
+                response_data["plot_status"] = "processing"
+
+        return JSONResponse(content=response_data)
     except HTTPException:
         raise
     except Exception as e:

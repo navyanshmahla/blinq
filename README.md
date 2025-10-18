@@ -101,19 +101,23 @@ All on one port for easy deployment.
 - [x] Request ID correlation for plots
 
 ### Phase 2: Database & Auth (Next)
-- [ ] Set up SQLAlchemy with PostgreSQL/SQLite
-- [ ] User, QueryHistory, Transaction models
-- [ ] JWT authentication (login/register)
-- [ ] Protected endpoints with `get_current_user` dependency
+- [x] Set up SQLAlchemy with PostgreSQL/SQLite
+- [x] User, QueryHistory, Transaction models
+- [x] JWT authentication (login/register)
+- [x] Protected endpoints with `get_current_user` dependency
 
 ### Phase 3: Core Features
-- [ ] Query history tracking
+- [x] Query history tracking
 - [ ] Usage and billing tracking
-- [ ] Kafka consumer integration with backend
-- [ ] Plot retrieval by request_id
+- [x] Plot retrieval by request_id
 
 ### Phase 4: Polish
 - [ ] Rate limiting
 - [ ] Error handling and logging
 - [ ] Frontend development
 - [ ] Deployment configuration
+
+# TODO
+- Frontend code up
+
+Long term plan-> include `fastapi-auth` rather than scratch implementation as its done now

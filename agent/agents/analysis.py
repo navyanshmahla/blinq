@@ -17,7 +17,9 @@ with open(config_path, "r") as f:
     configs = yaml.safe_load(f)
 
 if configs['run_state'] == "integrated":
-    from app.message_broker import KafkaProducer
+    from app.db.database import SessionLocal
+    from app.db import crud, schemas
+    from uuid import UUID
 
 MODEL_ANALYSIS_AGENT = configs['models']['MODEL_ANALYSIS_AGENT']
 
@@ -25,8 +27,6 @@ class analysisAgent():
     def __init__(self, df: pl.DataFrame, req_id: str):
         self.df = df
         self.tools = Tools(df)
-        if configs['run_state'] == "integrated":
-            self.kafka_producer = KafkaProducer()
         self.request_id = req_id
 
     async def sql(self, query: str):
@@ -74,7 +74,21 @@ class analysisAgent():
             }
 
             if configs['run_state'] == "integrated":
-                await self.kafka_producer.send_plot_notification(result)
+                db = SessionLocal()
+                try:
+                    crud.create_plot(db, schemas.PlotCreate(
+                        message_id=None,
+                        request_id=UUID(self.request_id),
+                        image_data=base64.b64decode(image_bytes)
+                    ))
+                    db.commit()
+                    print(f"[DEBUG] Plot saved to database with request_id: {self.request_id}")
+                except Exception as db_err:
+                    db.rollback()
+                    result["warning"] = f"Failed to save plot to database: {str(db_err)}"
+                    print(f"[DEBUG] Database save error: {str(db_err)}")
+                finally:
+                    db.close()
             else:
                 try:
                     output_path = os.path.join(os.path.dirname(__file__), f"plot_output_{self.request_id}.png")
