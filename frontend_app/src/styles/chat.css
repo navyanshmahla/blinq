@@ -1,0 +1,355 @@
+/* Chat Page Layout */
+.chat-page {
+  display: flex;
+  height: 100vh;
+  background: #343541;
+  color: #ececf1;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background: #202123;
+  border-right: 1px solid #444654;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+}
+
+.new-chat-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border: 1px solid #565869;
+  border-radius: 6px;
+  color: #ececf1;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 16px;
+}
+
+.new-chat-btn:hover {
+  background: #2a2b32;
+}
+
+.plus-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.conversations-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.conversation-item {
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.conversation-item:hover {
+  background: #2a2b32;
+}
+
+.conversation-item.active {
+  background: #343541;
+}
+
+.conversation-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ececf1;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conversation-timestamp {
+  font-size: 12px;
+  color: #8e8ea0;
+}
+
+/* Main Chat Area */
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+}
+
+.chat-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #444654;
+  background: #343541;
+}
+
+.chat-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ececf1;
+  margin: 0;
+}
+
+/* Messages */
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.empty-messages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: #8e8ea0;
+}
+
+.empty-messages h3 {
+  font-size: 20px;
+  margin: 0 0 8px 0;
+  color: #ececf1;
+}
+
+.empty-messages p {
+  font-size: 14px;
+  margin: 0;
+}
+
+.message {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.message.user {
+  background: #343541;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.message.assistant {
+  background: #444654;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #ececf1;
+}
+
+.message-plot-placeholder {
+  background: #2a2b32;
+  border: 1px dashed #565869;
+  border-radius: 8px;
+  padding: 48px;
+  text-align: center;
+  color: #8e8ea0;
+  font-size: 14px;
+}
+
+.message-meta {
+  font-size: 12px;
+  color: #8e8ea0;
+}
+
+/* Chat Bottom Section */
+.chat-bottom {
+  padding: 16px 24px 24px;
+  background: #343541;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* CSV Status */
+.csv-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.csv-status-none {
+  background: #40414f;
+  border: 1px solid #565869;
+}
+
+.csv-status-expired {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.csv-status-active {
+  background: rgba(16, 163, 127, 0.1);
+  border: 1px solid rgba(16, 163, 127, 0.3);
+}
+
+.csv-status-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.csv-status-icon {
+  font-size: 18px;
+}
+
+.csv-status-text {
+  color: #ececf1;
+}
+
+.csv-status-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.csv-status-filename {
+  color: #ececf1;
+  font-weight: 500;
+}
+
+.csv-status-expiry {
+  color: #8e8ea0;
+  font-size: 12px;
+}
+
+.csv-upload-btn,
+.csv-replace-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.csv-upload-btn {
+  background: #10a37f;
+  color: white;
+}
+
+.csv-upload-btn:hover {
+  background: #0e9168;
+}
+
+.csv-replace-btn {
+  background: transparent;
+  border: 1px solid #565869;
+  color: #ececf1;
+}
+
+.csv-replace-btn:hover {
+  background: #40414f;
+}
+
+/* Chat Input */
+.chat-input-container {
+  background: #40414f;
+  border-radius: 12px;
+  border: 1px solid #565869;
+  transition: all 0.2s;
+}
+
+.chat-input-container:focus-within {
+  border-color: #10a37f;
+  box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.1);
+}
+
+.chat-input-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 12px;
+}
+
+.chat-input-textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ececf1;
+  font-size: 15px;
+  font-family: inherit;
+  resize: none;
+  max-height: 200px;
+  line-height: 1.5;
+}
+
+.chat-input-textarea::placeholder {
+  color: #8e8ea0;
+}
+
+.chat-input-submit {
+  background: #10a37f;
+  border: none;
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.chat-input-submit:hover:not(:disabled) {
+  background: #0e9168;
+}
+
+.chat-input-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Scrollbar Styling */
+.conversations-list::-webkit-scrollbar,
+.messages-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.conversations-list::-webkit-scrollbar-track,
+.messages-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.conversations-list::-webkit-scrollbar-thumb,
+.messages-container::-webkit-scrollbar-thumb {
+  background: #565869;
+  border-radius: 3px;
+}
+
+.conversations-list::-webkit-scrollbar-thumb:hover,
+.messages-container::-webkit-scrollbar-thumb:hover {
+  background: #6e6e80;
+}
