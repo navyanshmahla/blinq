@@ -112,12 +112,15 @@ All on one port for easy deployment.
 - [x] Plot retrieval by request_id
 
 ### Phase 4: Polish
-- [ ] Rate limiting
+- [x] Rate limiting
 - [ ] Error handling and logging
 - [ ] Frontend development
 - [ ] Deployment configuration
 
 # TODO
+- Add backend logging (logging.py see this video: https://youtu.be/H9Blu0kWdZE?si=Cmdw6L8nebKZef6y)
 - Frontend code up
+- Add conversation history (state) to the agent
+- **Maybe** later refactor the code to have separate dirs like 'user', 'messages', 'conversations' inside the `/app` dir. A standard way of doing things. 
 
 Long term plan-> include `fastapi-auth` rather than scratch implementation as its done now

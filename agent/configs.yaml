@@ -1,12 +1,9 @@
 # Model configurations
 models:
-  # Model for the plotter agent
-  MODEL_PLOTTER_AGENT: "xai/grok-4-fast-reasoning"
-  
   # Main model for general tasks
   MODEL_MAIN: "xai/grok-4-fast-reasoning"
   
   # Model for data analysis agent
   MODEL_ANALYSIS_AGENT: "xai/grok-4-fast-reasoning"
 
-run_state: "standalone" # standalone or integrated
+run_state: "standalone" # 'standalone' or 'integrated'
