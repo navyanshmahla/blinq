@@ -113,7 +113,7 @@ All on one port for easy deployment.
 
 ### Phase 4: Polish
 - [x] Rate limiting
-- [ ] Error handling and logging
+- [partially-done] Error handling and logging (Metrics are all set for prometheus, for Loki, we need to add to all the files, only `auth.py` is done for now)
 - [ ] Frontend development
 - [ ] Deployment configuration
 

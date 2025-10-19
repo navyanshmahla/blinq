@@ -24,6 +24,7 @@ def get_limiter():
     return limiter
 
 @router.post("/register", response_model=schemas.UserResponse)
+@get_limiter().limit("3/minute")
 async def register(
     request: Request,
     email: str = Form(...),
@@ -31,7 +32,6 @@ async def register(
     full_name: str = Form(None),
     db: Session = Depends(get_db)
 ):
-    get_limiter().limit("3/minute")(lambda: None)()
 
     app_logger.info(
         "Signup attempt",
@@ -82,6 +82,7 @@ async def register(
         raise
 
 @router.post("/login")
+@get_limiter().limit("5/minute")
 async def login(
     request: Request,
     response: Response,
@@ -89,7 +90,6 @@ async def login(
     password: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    get_limiter().limit("5/minute")(lambda: None)()
     start_time = time.time()
 
     app_logger.info(
@@ -182,8 +182,8 @@ async def login(
         raise
 
 @router.post("/refresh")
+@get_limiter().limit("10/minute")
 async def refresh_token(request: Request, response: Response, db: Session = Depends(get_db)):
-    get_limiter().limit("10/minute")(lambda: None)()
 
     app_logger.debug(
         "Token refresh attempt",

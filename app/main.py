@@ -9,12 +9,18 @@ import sys
 import os
 import time
 from uuid import uuid4
+from dotenv import load_dotenv
+
 sys.path.append("../")
 
 from app.logger import app_logger
 from app.metrics import http_requests_total, http_request_duration_seconds
 
-app = FastAPI(title="Blinq API", version="1.0.0")
+
+app = FastAPI(
+    title="Blinq API",
+    version="1.0.0",
+    docs_url = None if os.getenv("ENVIRONMENT")=="prod" else "/docs")
 
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
