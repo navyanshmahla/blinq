@@ -14,7 +14,7 @@ router = APIRouter(tags=["conversations"])
 
 @router.post("/", response_model=schemas.ConversationResponse)
 async def create_conversation(
-    title: str = Form("New Conversation"),
+    title: str = Form("New Chat"),
     user_id: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):

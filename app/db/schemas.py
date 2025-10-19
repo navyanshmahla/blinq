@@ -14,6 +14,7 @@ class UserResponse(BaseModel):
     full_name: Optional[str]
     subscription_tier: str
     queries_used_this_month: int
+    bonus_credits: int
     last_query_reset_date: datetime
     created_at: datetime
 

@@ -119,6 +119,8 @@ All on one port for easy deployment.
 
 # TODO
 - Add billing related APIs
+- The "New Chat" which is automatically rendered to its actual one can be easily changed names in two ways- frontend calling a backend api VS frontend directly using LLM API from its frontend
+- Add password change facility
 - Add Prometheus and Loki on Grafana
 - Frontend code up
 - Add conversation history (state) to the agent

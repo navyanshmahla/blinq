@@ -14,6 +14,7 @@ class User(Base):
     full_name = Column(String, nullable=True)
     subscription_tier = Column(Enum('free', 'pro', name='subscription_tiers'), default='free')
     queries_used_this_month = Column(Integer, default=0)
+    bonus_credits = Column(Integer, default=0)
     last_query_reset_date = Column(DateTime, default=datetime.utcnow)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
