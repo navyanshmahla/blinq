@@ -24,6 +24,10 @@ def get_user_by_email(db: Session, email: str):
 def get_user_by_id(db: Session, user_id: UUID):
     return db.query(User).filter(User.id == user_id).first()
 
+def get_user(db: Session, user_id: UUID):
+    """Alias for get_user_by_id for consistency"""
+    return get_user_by_id(db, user_id)
+
 def increment_user_query_count(db: Session, user_id: UUID):
     user = get_user_by_id(db, user_id)
     if user:

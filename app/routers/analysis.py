@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 import polars as pl
@@ -14,6 +14,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from agent.agents.main_agent import run_main_agent
 from app.db import get_db, crud, schemas
 from app.auth.dependencies import get_current_user
+from app.utils.quota import check_query_quota, decrement_query_usage, reset_monthly_quota, get_remaining_queries
+from app.config import subscription_limits
 
 router = APIRouter(tags=["analysis"])
 
@@ -43,6 +45,27 @@ async def call_agent_api(
 ):
     """Run data analysis on uploaded CSV file within a conversation"""
     try:
+        user = crud.get_user(db, UUID(user_id))
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        reset_monthly_quota(db, user)
+
+        if not check_query_quota(user):
+            quota_info = get_remaining_queries(user)
+            monthly_limit = subscription_limits.FREE_QUERIES_PER_MONTH if user.subscription_tier == 'free' else subscription_limits.PRO_QUERIES_PER_MONTH
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "error": "Query quota exceeded",
+                    "subscription_tier": user.subscription_tier,
+                    "monthly_limit": monthly_limit,
+                    "queries_used": user.queries_used_this_month,
+                    "bonus_credits": user.bonus_credits,
+                    "suggestion": "Upgrade to Pro or purchase bonus credits at /api/credits/purchase"
+                }
+            )
+
         conversation = crud.get_conversation_by_id(db, conversation_id)
         if not conversation:
             raise HTTPException(status_code=404, detail="Conversation not found")
@@ -88,6 +111,8 @@ async def call_agent_api(
             cost=total_cost,
             model_used="grok-4-reasoning-fast"
         ))
+
+        decrement_query_usage(db, user)
 
         response_data = {
             "response": result,
