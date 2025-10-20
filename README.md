@@ -14,6 +14,7 @@ An AI-powered data analyst agent that helps you analyze and visualize your CSV d
 - [ ] Frontend code up
 - [ ] Add conversation history (state) to the agent
 - [ ] Add deployment scripts and docker files
+- [ ] Add deeper analysis- this would require the agent to write complete python code in secure executable sandbox unlike the simple polars SQL queries. This would help in analysis queries which require more deeper code execution like forecasting using ARIMA and all
 
 Why this if ChatGPT and Claude can already do this?
 The thing is they cannot if you are up for some serious data analysis. 
