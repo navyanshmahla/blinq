@@ -13,3 +13,4 @@ An AI-powered data analyst agent that helps you analyze and visualize your CSV d
 - [ ] Add Loki on Grafana (only `auth.py` is done for now, need to do for all)
 - [ ] Frontend code up
 - [ ] Add conversation history (state) to the agent
+- [ ] Add deployment scripts and docker files
