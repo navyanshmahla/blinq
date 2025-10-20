@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import '../styles/chat.css';
+import { Button } from './ui/button';
+import { Textarea } from './ui/textarea';
+import { ArrowUp } from 'lucide-react';
 
 function ChatInput({ onSendMessage, disabled }) {
   const [message, setMessage] = useState('');
@@ -28,27 +30,31 @@ function ChatInput({ onSendMessage, disabled }) {
   }, [message]);
 
   return (
-    <div className="chat-input-container">
-      <form onSubmit={handleSubmit} className="chat-input-form">
-        <textarea
-          ref={textareaRef}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Send a message..."
-          className="chat-input-textarea"
-          rows="1"
-          disabled={disabled}
-        />
-        <button
-          type="submit"
-          className="chat-input-submit"
-          disabled={!message.trim() || disabled}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M7 11L12 6L17 11M12 18V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
+    <div className="bg-background px-4 py-6">
+      <form onSubmit={handleSubmit} className="mx-auto max-w-3xl">
+        <div className="relative flex items-end gap-2 rounded-2xl border border-border bg-muted/30 px-4 py-3 shadow-sm transition-all focus-within:border-ring focus-within:shadow-md">
+          <Textarea
+            ref={textareaRef}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask me anything about your data..."
+            className="min-h-[24px] max-h-[200px] resize-none border-0 bg-transparent p-0 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
+            rows={1}
+            disabled={disabled}
+          />
+          <Button
+            type="submit"
+            size="icon"
+            disabled={!message.trim() || disabled}
+            className="h-8 w-8 shrink-0 rounded-lg bg-foreground text-background hover:bg-foreground/90 disabled:opacity-30"
+          >
+            <ArrowUp className="h-4 w-4" />
+          </Button>
+        </div>
+        <p className="mt-2 text-center text-xs text-muted-foreground">
+          Press Enter to send, Shift+Enter for new line
+        </p>
       </form>
     </div>
   );

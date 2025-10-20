@@ -5,12 +5,12 @@ import MessageList from '../components/MessageList';
 import CSVStatus from '../components/CSVStatus';
 import ChatInput from '../components/ChatInput';
 import { mockConversations, mockMessages } from '../utils/mockData';
-import '../styles/chat.css';
 
 function ChatPage() {
   const [conversations] = useState(mockConversations);
   const [activeConversationId, setActiveConversationId] = useState('1');
   const [messages, setMessages] = useState(mockMessages);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const activeConversation = conversations.find(c => c.id === activeConversationId);
   const currentMessages = messages[activeConversationId] || [];
@@ -37,21 +37,32 @@ function ChatPage() {
     }));
   };
 
+  const handleToggleSidebar = () => {
+    setIsSidebarOpen(prev => !prev);
+  };
+
   return (
-    <div className="chat-page">
+    <div className="flex h-screen bg-background">
       <Sidebar
         conversations={conversations}
         activeConversationId={activeConversationId}
         onSelectConversation={handleSelectConversation}
         onNewChat={handleNewChat}
+        isOpen={isSidebarOpen}
       />
 
-      <div className="chat-main">
-        <ChatHeader title={activeConversation?.title} />
+      <div className="flex flex-1 flex-col">
+        <ChatHeader
+          title={activeConversation?.title}
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={handleToggleSidebar}
+        />
 
-        <MessageList messages={currentMessages} />
+        <div className="flex-1 overflow-hidden">
+          <MessageList messages={currentMessages} />
+        </div>
 
-        <div className="chat-bottom">
+        <div className="border-t">
           <CSVStatus
             csvStatus={activeConversation?.csvStatus}
             csvFilename={activeConversation?.csvFilename}

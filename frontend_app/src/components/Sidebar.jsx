@@ -1,6 +1,9 @@
-import '../styles/chat.css';
+import { Button } from './ui/button';
+import { Card } from './ui/card';
+import { Plus, MessageSquare } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-function Sidebar({ conversations, activeConversationId, onSelectConversation, onNewChat }) {
+function Sidebar({ conversations, activeConversationId, onSelectConversation, onNewChat, isOpen }) {
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -13,22 +16,39 @@ function Sidebar({ conversations, activeConversationId, onSelectConversation, on
   };
 
   return (
-    <div className="sidebar">
-      <button className="new-chat-btn" onClick={onNewChat}>
-        <span className="plus-icon">+</span>
+    <div
+      className={cn(
+        "flex h-full flex-col border-r bg-muted/10 p-4 transition-all duration-300 ease-in-out",
+        isOpen ? "w-64" : "w-0 p-0 border-0 overflow-hidden"
+      )}
+    >
+      <Button onClick={onNewChat} className="mb-4 w-full justify-start gap-2">
+        <Plus className="h-4 w-4" />
         New Chat
-      </button>
+      </Button>
 
-      <div className="conversations-list">
+      <div className="flex-1 space-y-2 overflow-y-auto">
         {conversations.map((conv) => (
-          <div
+          <Card
             key={conv.id}
-            className={`conversation-item ${conv.id === activeConversationId ? 'active' : ''}`}
+            className={cn(
+              "cursor-pointer p-3 transition-all hover:shadow-md",
+              conv.id === activeConversationId
+                ? "border-primary bg-accent"
+                : "hover:bg-accent/50"
+            )}
             onClick={() => onSelectConversation(conv.id)}
           >
-            <div className="conversation-title">{conv.title}</div>
-            <div className="conversation-timestamp">{formatTimestamp(conv.timestamp)}</div>
-          </div>
+            <div className="flex items-start gap-2">
+              <MessageSquare className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-sm truncate">{conv.title}</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {formatTimestamp(conv.timestamp)}
+                </div>
+              </div>
+            </div>
+          </Card>
         ))}
       </div>
     </div>

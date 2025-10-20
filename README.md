@@ -108,7 +108,7 @@ All on one port for easy deployment.
 
 ### Phase 3: Core Features
 - [x] Query history tracking
-- [ ] Usage and billing tracking
+- [x] Usage and billing tracking
 - [x] Plot retrieval by request_id
 
 ### Phase 4: Polish
@@ -118,7 +118,6 @@ All on one port for easy deployment.
 - [ ] Deployment configuration
 
 # TODO
-- Add Stripe
 - The "New Chat" which is automatically rendered to its actual one can be easily changed names in two ways- frontend calling a backend api VS frontend directly using LLM API from its frontend
 - Add password change facility
 - Add Prometheus and Loki on Grafana
