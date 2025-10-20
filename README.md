@@ -14,3 +14,9 @@ An AI-powered data analyst agent that helps you analyze and visualize your CSV d
 - [ ] Frontend code up
 - [ ] Add conversation history (state) to the agent
 - [ ] Add deployment scripts and docker files
+
+Why this if ChatGPT and Claude can already do this?
+The thing is they cannot if you are up for some serious data analysis. 
+
+This-
+<img width="1240" height="1068" alt="image" src="https://github.com/user-attachments/assets/ab74d82d-5bd2-4dce-a876-99c58245a181" />
